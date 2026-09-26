@@ -2,12 +2,14 @@
  * Questions the screen asks about a Match at a moment in time. Pure functions.
  * fillFrame() is the per-frame hot path: it writes into a reused Frame and allocates nothing.
  */
-import { FLAG_ALIVE, type Blind, type Kill, type Match, type Nade, type RoundInfo, type TeamKey } from './types';
+import { FLAG_ALIVE, type Blind, type Drop, type Kill, type Match, type Nade, type RoundInfo, type TeamKey } from './types';
 
 export interface MatchIndex {
   killsByRound: Kill[][];
   nadesByRound: Nade[][];
   blindsByRound: Blind[][];
+  /** F-010 */
+  dropsByRound: Drop[][];
   /** deathTick[round][player] (Infinity = survived) */
   deathTick: number[][];
 }
@@ -19,12 +21,14 @@ export function makeIndex(m: Match): MatchIndex {
   for (const k of m.kills) killsByRound[k.round].push(k);
   for (const n of m.nades) nadesByRound[n.round].push(n);
   for (const b of m.blinds) blindsByRound[b.round].push(b);
+  const dropsByRound = m.rounds.map(() => [] as Drop[]);
+  for (const d of m.drops) dropsByRound[d.round].push(d);
   const deathTick = m.rounds.map((_, ri) => {
     const d = m.players.map(() => Infinity);
     for (const k of killsByRound[ri]) if (d[k.victim] === Infinity) d[k.victim] = k.tick;
     return d;
   });
-  return { killsByRound, nadesByRound, blindsByRound, deathTick };
+  return { killsByRound, nadesByRound, blindsByRound, dropsByRound, deathTick };
 }
 
 export interface PlayerFrame {

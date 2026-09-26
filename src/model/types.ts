@@ -104,6 +104,45 @@ export interface Blind {
   endTick: number;
 }
 
+/** F-010: a grenade lying on the ground during a live round. */
+export interface Drop {
+  type: UtilityId;
+  round: number;
+  /** Who dropped it (index into Match.players). */
+  player: number;
+  /** 'hand' = dropped on purpose; 'death' = fell when he died. */
+  cause: 'hand' | 'death';
+  /** When it hit the ground (within one position sample, 1/8 s at the default setting). */
+  tick: number;
+  /** When it was picked up, or the round's last tick if nobody did. */
+  endTick: number;
+  /** Who picked it up, -1 = nobody. */
+  pickedBy: number;
+  /** Where: the player's feet when he dropped it, or where he died. */
+  pos: Vec3;
+}
+
+/** F-010: counts used by the real-demo test to check the drop finder against the game's own pickup events. */
+export interface DropStats {
+  hand: number;
+  /** Grenades that vanished without a throw while NOT in hand (so not a drop; counted to catch a wrong rule). */
+  handRejected: number;
+  /** Grenades that left the inventory while the player's money went up: sold back, not dropped. */
+  sold: number;
+  death: number;
+  /** Grenade pickups from the ground (before the round was decided). */
+  pickups: number;
+  /** item_pickup events that were purchases (money went down), not counted in pickups. */
+  bought: number;
+  /** Of those, how many picked up a drop we found. */
+  explained: number;
+  /** Death drops confirmed by a pickup, and how many of those our "which grenade fell" rule got right. */
+  deathChecked: number;
+  deathAgreed: number;
+  /** Drops left out because they were picked up again before buy time ended (handed over in spawn). */
+  handovers: number;
+}
+
 export interface Place {
   name: string;
   pos: Vec3;
@@ -126,6 +165,10 @@ export interface Match {
   nades: Nade[];
   blinds: Blind[];
   places: Place[];
+  /** F-010: dropped grenades. Empty when the feature is off. */
+  drops: Drop[];
+  /** F-010: null when the feature is off. */
+  dropStats: DropStats | null;
   /** Things the reader noticed but could not handle, shown in the debug panel. */
   notes: string[];
 }

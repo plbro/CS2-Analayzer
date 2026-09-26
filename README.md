@@ -5,7 +5,7 @@ positions, aim direction, HP, armor, money, weapons, utility, kills, bomb, and m
 
 **Your demo never leaves your computer.** It's read inside your browser by a WebAssembly demo reader, so there's no upload and no server.
 
-> Status: early (v0.2.0). The replay works; ratings, smoke library, player tendencies and pro-match library are planned.
+> Status: early (v0.3.0). The replay works; ratings, smoke library, player tendencies and pro-match library are planned.
 
 ## Use it
 
@@ -30,7 +30,10 @@ Works best in a desktop Chrome, Edge or Firefox. Phones may run out of memory on
 - **Round events**: every kill and bomb event with its time; click one to jump there.
 - **Timeline** (bottom): kills, bomb timer, playhead. Drag to scrub.
 - **Multi-round mode**: overlay many rounds of one team at once, synced from the moment each round went live. Pick players,
-  their utility types, enemy players and enemy utility, and the bomb.
+  their utility types, enemy players and enemy utility, the bomb, and **dropped utility**: grenades lying on the ground
+  (dropped by hand or by a player who died) until someone picks them up. The demo has no "dropped" event, so drops are
+  worked out from each player's grenades and the game's pickup events; the spot is the player's feet, and which grenade a
+  dead player dropped is a best guess when nobody picked it up. Grenades handed over in spawn during buy time are left out.
 - **Drawing** on the map, zoom and pan.
 
 ## Hotkeys

@@ -57,7 +57,9 @@ export function MultiFilters({ store }: { store: ReplayStore }) {
       <div>
         <h3>On map</h3>
         <button className="chk-row" aria-pressed={ms.bomb} onClick={() => update({ bomb: !ms.bomb })}><i />Bomb</button>
-        <button className="chk-row" aria-pressed={false} disabled title="Not built yet"><i />Dropped utility<small>coming later</small></button>
+        {S.features.droppedUtility ? (
+          <button className="chk-row" aria-pressed={ms.dropped} title="Grenades lying on the ground until someone picks them up" onClick={() => update({ dropped: !ms.dropped })}><i />Dropped utility</button>
+        ) : null}
       </div>
       <button className="reset" onClick={() => { store.set({ multi: defaultMulti(m, team) }); store.setMultiTime(0); }}><Icon name="reset" />Reset filters</button>
     </section>

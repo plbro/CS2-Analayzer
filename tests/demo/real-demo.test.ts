@@ -19,6 +19,9 @@ import { matchEnding, mustSwap, scoreFromName } from './rules';
 
 interface Expected { map?: string; rounds?: number; score?: Record<string, number> | string; kills?: number }
 
+/** F-010 thresholds: how well the drop finder must agree with the game's own pickup events. */
+const DROP_MIN_EXPLAINED = 0.8, DROP_MAX_REJECTED = 0.2, DROP_MIN_DEATH_RULE = 0.8, DROP_MAX_WAS_THROW = 0.05;
+
 const dir = path.resolve(__dirname, '../../test-demos');
 const { _source, ...expected } = JSON.parse(fs.readFileSync(path.join(__dirname, 'expected.json'), 'utf8')) as Record<string, Expected>;
 void _source;
@@ -51,7 +54,7 @@ describe('real demos', () => {
       const t0 = Date.now();
       let m;
       try {
-        m = readDemo({ parseHeader, parseEvents, parseTicks }, bytes, S.parse, siteWorldPositions, (s) => stages.push(s));
+        m = readDemo({ parseHeader, parseEvents, parseTicks }, bytes, S.parse, siteWorldPositions, (s) => stages.push(s), S.features);
       } catch (err) {
         row.notes = `could not be read: ${err instanceof Error ? err.message : String(err)}`;
         throw err;
@@ -117,6 +120,31 @@ describe('real demos', () => {
       expect(smokes.filter((s) => s > 15 && s < 25).length / smokes.length, 'share of smokes lasting 15–25 s').toBeGreaterThan(0.8);
       expect(m.rounds.filter((r) => r.plantTick !== null).every((r) => r.plantSite === 'A' || r.plantSite === 'B'), 'every plant has a site').toBe(true);
       expect(m.blinds.length, 'flashes that blinded someone').toBeGreaterThan(m.rounds.length);
+      // ---- F-010 dropped utility, checked against the game's own "picked up a grenade" events (an independent source)
+      if (S.features.droppedUtility) {
+        const ds = m.dropStats;
+        expect(ds, 'dropped-utility counts').not.toBeNull();
+        if (!ds) return;
+        console.log(`${file}: drops ${ds.hand} by hand + ${ds.death} on death (${ds.handovers} spawn handovers hidden, ${ds.sold} sold); ` +
+          `ground pickups ${ds.pickups} (${ds.bought} purchases skipped), of which ${ds.explained} picked up a drop we found; ` +
+          `vanished while not in hand ${ds.handRejected}; death rule right ${ds.deathAgreed}/${ds.deathChecked}`);
+        for (const d of m.drops) {
+          const r = m.rounds[d.round];
+          expect(d.tick >= r.startTick && d.tick <= r.endTick, `drop at tick ${d.tick} is inside round ${r.n}`).toBe(true);
+          expect(d.pickedBy < 0 || d.endTick > r.freezeEndTick + S.parse.dropBuyTimeSeconds * m.tickrate, `drop at tick ${d.tick} is a spawn handover and should be hidden`).toBe(true);
+          expect(d.endTick > d.tick && d.endTick <= r.officialEndTick, `drop at tick ${d.tick} ends inside its round`).toBe(true);
+          expect(d.pos.every(Number.isFinite), 'drop has a position').toBe(true);
+        }
+        // a "drop" that actually flew and went off is a throw we mistook for a drop (landings are a separate source)
+        const hand = m.drops.filter((d) => d.cause === 'hand');
+        const wasThrow = hand.filter((d) => m.nades.some((n) => n.thrower === d.player && n.type === d.type && n.throwTick !== null && n.throwTick <= d.tick && d.tick - n.throwTick <= 2 * m.tickrate));
+        expect(wasThrow.length / Math.max(1, hand.length), 'share of hand drops that were really throws (the grenade went off)').toBeLessThan(DROP_MAX_WAS_THROW);
+        expect(ds.pickups, 'grenade pickups from the ground (too few to judge the drop finder)').toBeGreaterThanOrEqual(5);
+        expect(ds.explained / ds.pickups, 'share of grenade pickups from the ground that picked up a drop we found').toBeGreaterThan(DROP_MIN_EXPLAINED);
+        expect(ds.handRejected / Math.max(1, ds.hand + ds.handRejected), 'share of vanished grenades that were NOT in hand').toBeLessThan(DROP_MAX_REJECTED);
+        if (ds.deathChecked >= 3) expect(ds.deathAgreed / ds.deathChecked, 'which grenade a dead player dropped: our rule vs pickups').toBeGreaterThan(DROP_MIN_DEATH_RULE);
+        else console.warn(`NOTE: ${file}: only ${ds.deathChecked} death drops were picked up, so the death-drop rule was not judged.`);
+      }
       row.result = 'ok';
     });
   }

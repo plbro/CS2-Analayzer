@@ -19,6 +19,8 @@ export interface MultiState {
   showEnemies: boolean;
   enemyUtil: Set<UtilityId>;
   bomb: boolean;
+  /** F-010 */
+  dropped: boolean;
 }
 
 export interface Stroke { color: string; pts: number[] }
@@ -53,6 +55,7 @@ export function defaultMulti(m: Match, team: TeamKey = 0): MultiState {
     showEnemies: false,
     enemyUtil: new Set(),
     bomb: false,
+    dropped: false,
   };
 }
 

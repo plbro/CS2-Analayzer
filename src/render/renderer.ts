@@ -3,10 +3,12 @@
  * Budget per frame (single round): 10 players, ≤ ~40 grenades, ≤ 10 death marks, drawings.
  */
 import { S } from '../config/settings-schema';
-import { BOMB_ITEM } from '../config/weapons';
+import { BOMB_ITEM, UTILITY_ORDER, type UtilityId } from '../config/weapons';
+import { ICONS } from '../ui/Icon';
+import { iconPathData } from './icon-path';
 import { layerFor, RADAR_PX, toRadar, type MapInfo } from '../model/maps';
 import { fillFrame, nadeState, newFrame, type Frame } from '../model/query';
-import { FLAG_ALIVE, type Nade, type Side } from '../model/types';
+import { FLAG_ALIVE, type Drop, type Nade, type Side } from '../model/types';
 import type { ReplayStore } from '../playback/store';
 
 const GAP = 48; // radar px between the two levels of a two-level map
@@ -36,6 +38,8 @@ export class MapRenderer {
   private fireDots: number[] = [];
   /** Inventory ids that contain the bomb, worked out once. */
   private bombInv: Uint8Array;
+  /** F-010: grenade icons as canvas paths, built once. */
+  private iconPaths = new Map<UtilityId, Path2D>();
   view: ViewXform = { zoom: 1, panX: 0, panY: 0 };
   /** Last computed transform: screen = radar * scale + (ox, oy) */
   scale = 1; ox = 0; oy = 0;
@@ -49,6 +53,7 @@ export class MapRenderer {
     let seed = 7;
     const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
     for (let i = 0; i < 16; i++) { const a = rnd() * Math.PI * 2, d = Math.sqrt(rnd()); this.fireDots.push(Math.cos(a) * d, Math.sin(a) * d); }
+    if (S.features.droppedUtility) for (const u of UTILITY_ORDER) this.iconPaths.set(u, new Path2D(iconPathData(ICONS[u]).d));
     if (map) {
       map.layers.forEach((layer, i) => {
         const img = new Image();
@@ -200,6 +205,15 @@ export class MapRenderer {
         this.drawNade(n, tick, burst, k, r.sides[thrower.team]);
       }
       if (ms.bomb) this.drawBomb(ri, tick, k);
+      if (ms.dropped && S.features.droppedUtility) { // F-010
+        for (const d of store.index.dropsByRound[ri]) {
+          if (tick < d.tick || tick >= d.endTick) continue;
+          const owner = m.players[d.player];
+          if (!owner) continue;
+          if (owner.team === ms.team ? !(ms.players.has(d.player) && ms.util.has(d.type)) : !ms.showEnemies) continue;
+          this.drawDrop(d, k, this.sideColor(r.sides[owner.team]));
+        }
+      }
       for (const p of shownPlayers) {
         const f = frame.players[p.idx];
         const col = S.colors.multiPalette[(p.slot - 1) % S.colors.multiPalette.length];
@@ -317,6 +331,25 @@ export class MapRenderer {
         break;
       }
     }
+  }
+
+  /** F-010: a grenade on the ground: dark disc, team-coloured ring and the grenade's icon. */
+  private drawDrop(d: Drop, k: number, color: string) {
+    const c = this.project(d.pos[0], d.pos[1], d.pos[2]);
+    const icon = this.iconPaths.get(d.type);
+    if (!c || !icon) return;
+    const { ctx } = this;
+    const R = S.map.dropIconRadius * k;
+    ctx.save();
+    ctx.globalAlpha = 0.9;
+    ctx.fillStyle = GROUND; ctx.strokeStyle = color; ctx.lineWidth = 1.6 * k;
+    ctx.beginPath(); ctx.arc(c[0], c[1], R, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    const s = (R * 1.5) / 24; // the icon fills ~75% of the disc
+    ctx.translate(c[0] - 12 * s, c[1] - 12 * s);
+    ctx.scale(s, s);
+    ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.stroke(icon);
+    ctx.restore();
   }
 
   private drawBomb(ri: number, tick: number, k: number) {

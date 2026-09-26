@@ -24,6 +24,7 @@ self.onmessage = async (ev: MessageEvent<{ file: File }>) => {
       S.parse,
       siteWorldPositions,
       (stage) => self.postMessage({ type: 'stage', stage }),
+      S.features,
     );
     self.postMessage({ type: 'done', match }, transferables(match));
   } catch (err) {

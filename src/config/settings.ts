@@ -18,6 +18,11 @@ export const SETTINGS = {
     killFeed: true,
     /** Two-level maps (Nuke, Vertigo, Train) show both levels side by side. Off = one level at a time, L switches. */
     levelSplit: true,
+    /**
+     * "Dropped utility" in multi-round mode: grenades lying on the ground (dropped by hand or when a player died),
+     * shown until someone picks them up. Off = the checkbox is gone and drops aren't worked out at all.
+     */
+    droppedUtility: true,
   },
 
   /** How the demo is read. Changes take effect on the next demo you load. */
@@ -51,6 +56,21 @@ export const SETTINGS = {
      * 12 still lets in a match with a substitute. Range 10–24.
      */
     maxPlayers: 12,
+    /**
+     * Dropped utility: grenades dropped and picked up again before this many seconds after freeze time (handed over
+     * in spawn) are not shown, so spawn doesn't fill with icons. CS2 buy time = 20. 0 = show every handover. Range 0–60.
+     */
+    dropBuyTimeSeconds: 20,
+    /**
+     * Dropped utility: a grenade leaves the player's inventory up to this long after the throw (the end of the throw
+     * animation; measured 0.3–0.6 s). Too small = throws show up as drops. Range 0.2–3.
+     */
+    dropThrowLagSeconds: 1,
+    /**
+     * Dropped utility: a player picking up a grenade within this many game units of a dropped one ends it
+     * (a player is about 32 wide; a dropped grenade flies a few steps forward). Bigger = more pickups matched, but a wrong grenade can be matched. Range 50–600.
+     */
+    dropPickupRadiusUnits: 400,
   },
 
   /** Round rules used for the clock. Only change for custom game modes. */
@@ -97,6 +117,8 @@ export const SETTINGS = {
     flashBurstSeconds: 0.5,
     /** How long the HE burst shows, seconds. Range 0.1–2. */
     heBurstSeconds: 0.4,
+    /** Dropped-utility icon radius (multi-round mode). Range 4–20. */
+    dropIconRadius: 8,
     /** Kills stay in the kill feed for this many seconds. Range 2–60. */
     killFeedSeconds: 10,
     /** Kill feed shows at most this many lines. Range 1–10. */

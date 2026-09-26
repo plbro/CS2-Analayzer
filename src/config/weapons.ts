@@ -19,6 +19,13 @@ export const UTILITY_LABEL: Record<UtilityId, string> = {
   smoke: 'Smoke', flash: 'Flashbang', he: 'HE grenade', molotov: 'Molotov / incendiary', decoy: 'Decoy',
 };
 
+/**
+ * When a player dies without a grenade in his hand (or one he held earlier in the round), we guess his most valuable one. Most valuable first
+ * (molotov/incendiary 400–500, smoke 300, HE 300, flash 200, decoy 50). Smoke vs HE cost the same; a later pickup
+ * corrects the guess when someone picks it up.
+ */
+export const DEATH_DROP_ORDER: UtilityId[] = ['molotov', 'smoke', 'he', 'flash', 'decoy'];
+
 export const BOMB_ITEM = 'C4 Explosive';
 
 export const PISTOLS = new Set([

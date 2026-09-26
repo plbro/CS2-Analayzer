@@ -9,7 +9,7 @@ import { actionFor, HOTKEYS } from '../../src/ui/hotkeys';
 import { layerFor, mapInfo, siteWorldPositions, toRadar } from '../../src/model/maps';
 import type { Nade, RoundInfo } from '../../src/model/types';
 
-const cfg: ParseCfg = { tickrate: 64, sampleEveryTicks: 8, freezeWindowSeconds: 20, postRoundSeconds: 7, minBlindSeconds: 0.3, nadeMatchWindowSeconds: 20, smokeFallbackSeconds: 20, fireFallbackSeconds: 7, minPlayers: 8, maxPlayers: 12 };
+const cfg: ParseCfg = { tickrate: 64, sampleEveryTicks: 8, freezeWindowSeconds: 20, postRoundSeconds: 7, minBlindSeconds: 0.3, nadeMatchWindowSeconds: 20, smokeFallbackSeconds: 20, fireFallbackSeconds: 7, minPlayers: 8, maxPlayers: 12, dropBuyTimeSeconds: 20, dropThrowLagSeconds: 1, dropPickupRadiusUnits: 400 };
 const ev = (event_name: string, tick: number, extra: Row = {}): Row => ({ event_name, tick, ...extra });
 
 describe('findRounds', () => {

@@ -4,9 +4,10 @@
  */
 import { MATCH_FORMAT } from '../version';
 import { THROW_WEAPONS, type UtilityId } from '../config/weapons';
+import { findDrops } from './drops'; // F-010
 import {
   FLAG_ALIVE, FLAG_HELMET, FLAG_KIT,
-  type Blind, type Kill, type Match, type Nade, type Place, type PlayerInfo, type PlayerSamples,
+  type Blind, type Drop, type DropStats, type Kill, type Match, type Nade, type Place, type PlayerInfo, type PlayerSamples,
   type RoundInfo, type Side, type TeamInfo, type TeamKey, type Vec3,
 } from '../model/types';
 
@@ -24,6 +25,9 @@ export interface ParseCfg {
   fireFallbackSeconds: number;
   minPlayers: number;
   maxPlayers: number;
+  dropBuyTimeSeconds: number;
+  dropThrowLagSeconds: number;
+  dropPickupRadiusUnits: number;
 }
 
 /** Events we ask the reader for (one pass). */
@@ -33,6 +37,10 @@ export const EVENT_NAMES = [
   'smokegrenade_detonate', 'smokegrenade_expired', 'inferno_startburn', 'inferno_expire',
   'flashbang_detonate', 'hegrenade_detonate', 'decoy_started', 'decoy_detonate',
 ];
+/** The events to ask for. F-010 adds grenade pickups only when dropped utility is on. */
+export function eventNames(drops: boolean): string[] {
+  return drops ? [...EVENT_NAMES, 'item_pickup'] : EVENT_NAMES;
+}
 /** Extra fields added to every event about the player involved (gives user_X, attacker_X, ...). */
 export const EVENT_PLAYER_PROPS = ['X', 'Y', 'Z'];
 export const EVENT_OTHER_PROPS = ['is_warmup_period', 'total_rounds_played'];
@@ -189,6 +197,8 @@ export interface BuildInput {
   cfg: ParseCfg;
   /** Bomb site centres in world units, from the map file (optional). */
   sites?: { A: [number, number]; B: [number, number] } | null;
+  /** F-010: work out dropped grenades (features.droppedUtility). */
+  drops: boolean;
 }
 
 /**
@@ -205,7 +215,7 @@ export function checkPlayerCount(count: number, cfg: Pick<ParseCfg, 'minPlayers'
 }
 
 /** Builds the full Match. */
-export function buildMatch({ header, events, ticks, cfg, sites }: BuildInput): Match {
+export function buildMatch({ header, events, ticks, cfg, sites, drops: wantDrops }: BuildInput): Match {
   const notes: string[] = [];
   const rate = cfg.tickrate;
   const step = cfg.sampleEveryTicks;
@@ -342,6 +352,7 @@ export function buildMatch({ header, events, ticks, cfg, sites }: BuildInput): M
   const throws: { player: number; type: UtilityId; tick: number; pos: Vec3 }[] = [];
   const dets: { player: number; type: UtilityId; tick: number; endTick: number; pos: Vec3; entity: number }[] = [];
   const flashDets: number[] = [];
+  const pickups: { player: number; type: UtilityId; tick: number; pos: Vec3 }[] = []; // F-010
   const pos = (e: Row, pre: string): Vec3 => [num(e[`${pre}X`], NaN), num(e[`${pre}Y`], NaN), num(e[`${pre}Z`], NaN)];
   const who = (v: unknown) => pIndex.get(str(v)) ?? -1;
   for (const e of sorted) {
@@ -352,6 +363,12 @@ export function buildMatch({ header, events, ticks, cfg, sites }: BuildInput): M
       const type = THROW_WEAPONS[str(e.weapon)];
       const p = who(e.user_steamid);
       if (type && p >= 0) throws.push({ player: p, type, tick, pos: pos(e, 'user_') });
+      continue;
+    }
+    if (name === 'item_pickup') { // F-010
+      const type = THROW_WEAPONS[`weapon_${str(e.item)}`];
+      const p = who(e.user_steamid);
+      if (type && p >= 0 && ri >= 0) pickups.push({ player: p, type, tick, pos: pos(e, 'user_') });
       continue;
     }
     if (ri < 0) continue;
@@ -415,6 +432,15 @@ export function buildMatch({ header, events, ticks, cfg, sites }: BuildInput): M
     }
   });
 
+  // ---- F-010: dropped grenades
+  let drops: Drop[] = [];
+  let dropStats: DropStats | null = null;
+  if (wantDrops) {
+    const found = findDrops({ rounds, samples, inventories, strings, throws, kills, pickups, cfg });
+    drops = found.drops;
+    dropStats = found.stats;
+  }
+
   const places: Place[] = [...placeAcc.entries()].filter(([, a]) => a[3] >= 20)
     .map(([name, a]) => ({ name, pos: [a[0] / a[3], a[1] / a[3], a[2] / a[3]] as Vec3 }));
 
@@ -424,7 +450,7 @@ export function buildMatch({ header, events, ticks, cfg, sites }: BuildInput): M
     serverName: str(header.server_name),
     tickrate: rate,
     sampleStep: step,
-    teams, players, rounds, samples, strings, inventories, kills, nades, blinds, places, notes,
+    teams, players, rounds, samples, strings, inventories, kills, nades, blinds, places, drops, dropStats, notes,
   };
 }
 
