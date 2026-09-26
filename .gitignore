@@ -1,0 +1,24 @@
+# Dependencies and build output (rebuilt by "npm install" / "npm run build")
+node_modules/
+dist/
+coverage/
+
+# Demo files are huge (300-400 MB) and belong to their owners: never commit them
+test-demos/
+*.dem
+*.dem.*
+*.rar
+*.zip
+
+# Local settings, logs, secrets (none are needed today; this keeps it that way)
+.env
+.env.*
+*.log
+npm-debug.log*
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

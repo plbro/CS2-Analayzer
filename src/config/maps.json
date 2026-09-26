@@ -1,0 +1,209 @@
+{
+  "de_ancient": {
+    "posX": -2953,
+    "posY": 2164,
+    "scale": 5,
+    "bombA": [
+      0.31,
+      0.25
+    ],
+    "bombB": [
+      0.8,
+      0.4
+    ],
+    "layers": [
+      {
+        "id": "default",
+        "image": "maps/de_ancient/radar.png",
+        "altMin": -1000000000,
+        "altMax": 1000000000
+      }
+    ]
+  },
+  "de_anubis": {
+    "posX": -2796,
+    "posY": 3328,
+    "scale": 5.22,
+    "bombA": [
+      null,
+      null
+    ],
+    "bombB": [
+      null,
+      null
+    ],
+    "layers": [
+      {
+        "id": "default",
+        "image": "maps/de_anubis/radar.png",
+        "altMin": -1000000000,
+        "altMax": 1000000000
+      }
+    ]
+  },
+  "de_dust2": {
+    "posX": -2476,
+    "posY": 3239,
+    "scale": 4.4,
+    "bombA": [
+      0.8,
+      0.16
+    ],
+    "bombB": [
+      0.21,
+      0.12
+    ],
+    "layers": [
+      {
+        "id": "default",
+        "image": "maps/de_dust2/radar.png",
+        "altMin": -1000000000,
+        "altMax": 1000000000
+      }
+    ]
+  },
+  "de_inferno": {
+    "posX": -2087,
+    "posY": 3870,
+    "scale": 4.9,
+    "bombA": [
+      0.81,
+      0.69
+    ],
+    "bombB": [
+      0.49,
+      0.22
+    ],
+    "layers": [
+      {
+        "id": "default",
+        "image": "maps/de_inferno/radar.png",
+        "altMin": -1000000000,
+        "altMax": 1000000000
+      }
+    ]
+  },
+  "de_mirage": {
+    "posX": -3230,
+    "posY": 1713,
+    "scale": 5,
+    "bombA": [
+      0.54,
+      0.76
+    ],
+    "bombB": [
+      0.23,
+      0.28
+    ],
+    "layers": [
+      {
+        "id": "default",
+        "image": "maps/de_mirage/radar.png",
+        "altMin": -1000000000,
+        "altMax": 1000000000
+      }
+    ]
+  },
+  "de_nuke": {
+    "posX": -3453,
+    "posY": 2887,
+    "scale": 7,
+    "bombA": [
+      0.58,
+      0.48
+    ],
+    "bombB": [
+      0.58,
+      0.58
+    ],
+    "layers": [
+      {
+        "id": "default",
+        "image": "maps/de_nuke/radar.png",
+        "altMin": -495,
+        "altMax": 1000000000
+      },
+      {
+        "id": "lower",
+        "image": "maps/de_nuke/radar_lower.png",
+        "altMin": -10000,
+        "altMax": -495
+      }
+    ]
+  },
+  "de_overpass": {
+    "posX": -4831,
+    "posY": 1781,
+    "scale": 5.2,
+    "bombA": [
+      0.55,
+      0.23
+    ],
+    "bombB": [
+      0.7,
+      0.31
+    ],
+    "layers": [
+      {
+        "id": "default",
+        "image": "maps/de_overpass/radar.png",
+        "altMin": -1000000000,
+        "altMax": 1000000000
+      }
+    ]
+  },
+  "de_train": {
+    "posX": -2308,
+    "posY": 2078,
+    "scale": 4.082077,
+    "bombA": [
+      0.63,
+      0.49
+    ],
+    "bombB": [
+      0.52,
+      0.76
+    ],
+    "layers": [
+      {
+        "id": "default",
+        "image": "maps/de_train/radar.png",
+        "altMin": -50,
+        "altMax": 1000000000
+      },
+      {
+        "id": "lower",
+        "image": "maps/de_train/radar_lower.png",
+        "altMin": -5000,
+        "altMax": -50
+      }
+    ]
+  },
+  "de_vertigo": {
+    "posX": -3168,
+    "posY": 1762,
+    "scale": 4,
+    "bombA": [
+      0.705,
+      0.585
+    ],
+    "bombB": [
+      0.222,
+      0.223
+    ],
+    "layers": [
+      {
+        "id": "default",
+        "image": "maps/de_vertigo/radar.png",
+        "altMin": 11700,
+        "altMax": 1000000000
+      },
+      {
+        "id": "lower",
+        "image": "maps/de_vertigo/radar_lower.png",
+        "altMin": -10000,
+        "altMax": 11700
+      }
+    ]
+  }
+}

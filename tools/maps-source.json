@@ -1,0 +1,5 @@
+{
+  "_comment": "Where tools/fetch-maps.mjs downloads radar images and overview numbers from. The images are Valve's; this repo only mirrors them for the replay. Add a map by adding its name to 'maps' and re-running: npm run fetch-maps",
+  "base": "https://raw.githubusercontent.com/MurkyYT/cs2-map-icons/main",
+  "maps": ["de_ancient", "de_anubis", "de_dust2", "de_inferno", "de_mirage", "de_nuke", "de_overpass", "de_train", "de_vertigo"]
+}

@@ -1,0 +1,5 @@
+{
+  "_source": "Final scores checked against match reports (Hotspawn, BLAST Open Porto 2026 semi-final: Nuke 13-8, Ancient 13-11 to Spirit). Kill counts are regression values from our own reader.",
+  "spirit-vs-falcons-m2-ancient.dem": { "map": "de_ancient", "rounds": 24, "score": { "Spirit": 13, "Falcons": 11 }, "kills": 161 },
+  "spirit-vs-falcons-m1-nuke.dem": { "map": "de_nuke", "rounds": 21, "score": { "Spirit": 13, "Falcons": 8 }, "kills": 142 }
+}

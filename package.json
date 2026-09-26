@@ -1,0 +1,32 @@
+{
+  "name": "open-skybox",
+  "version": "0.1.2",
+  "description": "Free, open-source CS2 demo analyzer with a 2D replay. Demos never leave your browser.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:demo": "vitest run --config vitest.demo.config.ts",
+    "check": "node tools/check.mjs",
+    "verify": "npm run typecheck && npm run check && npm run test",
+    "fetch-maps": "node tools/fetch-maps.mjs"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.4",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^4.7.0",
+    "typescript": "^5.9.3",
+    "vite": "^5.4.21",
+    "vitest": "^2.1.9"
+  },
+  "private": true,
+  "type": "module"
+}
