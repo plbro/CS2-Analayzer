@@ -1,5 +1,9 @@
 {
-  "_source": "Final scores checked against match reports (Hotspawn, BLAST Open Porto 2026 semi-final: Nuke 13-8, Ancient 13-11 to Spirit). Kill counts are regression values from our own reader.",
-  "spirit-vs-falcons-m2-ancient.dem": { "map": "de_ancient", "rounds": 24, "score": { "Spirit": 13, "Falcons": 11 }, "kills": 161 },
-  "spirit-vs-falcons-m1-nuke.dem": { "map": "de_nuke", "rounds": 21, "score": { "Spirit": 13, "Falcons": 8 }, "kills": 142 }
+  "_source": "Final scores checked against match reports: BLAST Open Porto 2026 semi-final Spirit–Falcons (Hotspawn: Nuke 13-8, Ancient 13-11) and grand final Spirit–MOUZ (Fragster: Dust2 13-8 Spirit, Mirage 13-11 MOUZ, Ancient 13-3 Spirit, Nuke 13-6 Spirit). Kill counts are regression values from our own reader (the test also checks them against the game's scoreboard).",
+  "spirit-vs-falcons-m2-ancient.dem": {"map": "de_ancient", "rounds": 24, "score": {"Spirit": 13, "Falcons": 11}, "kills": 161},
+  "spirit-vs-falcons-m1-nuke.dem": {"map": "de_nuke", "rounds": 21, "score": {"Spirit": 13, "Falcons": 8}, "kills": 142},
+  "spirit-vs-mouz-m1-dust2[13-8].dem": {"map": "de_dust2", "rounds": 21, "score": {"Spirit": 13, "MOUZ": 8}, "kills": 133},
+  "spirit-vs-mouz-m2-mirage[11-13].dem": {"map": "de_mirage", "rounds": 24, "score": {"Spirit": 11, "MOUZ": 13}, "kills": 158},
+  "spirit-vs-mouz-m3-ancient[13-3].dem": {"map": "de_ancient", "rounds": 16, "score": {"Spirit": 13, "MOUZ": 3}, "kills": 116},
+  "spirit-vs-mouz-m4-nuke[13-6].dem": {"map": "de_nuke", "rounds": 19, "score": {"Spirit": 13, "MOUZ": 6}, "kills": 129}
 }

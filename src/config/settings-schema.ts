@@ -14,6 +14,8 @@ export const NUMBER_RULES: Record<string, [number, number, number]> = {
   'parse.nadeMatchWindowSeconds': [2, 40, 20],
   'parse.smokeFallbackSeconds': [5, 30, 20],
   'parse.fireFallbackSeconds': [2, 15, 7],
+  'parse.minPlayers': [2, 10, 8],
+  'parse.maxPlayers': [10, 24, 12],
   'rules.roundSeconds': [30, 600, 115],
   'rules.bombSeconds': [10, 90, 40],
   'playback.defaultSpeed': [0.1, 16, 1],

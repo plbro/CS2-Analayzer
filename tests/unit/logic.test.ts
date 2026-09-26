@@ -1,6 +1,6 @@
 /** Fast checks of every pure decision. Run: npm test */
 import { describe, expect, it } from 'vitest';
-import { findBlinds, findRounds, pairNades, roundAt, sampleTicks, winReason, type ParseCfg, type Row } from '../../src/parser/build';
+import { checkPlayerCount, findBlinds, findRounds, pairNades, roundAt, sampleTicks, winReason, type ParseCfg, type Row } from '../../src/parser/build';
 import { sniffDemo } from '../../src/parser/read';
 import { lerpAngle, nadeState, roundClock, fmtSeconds } from '../../src/model/query';
 import { resolveSettings } from '../../src/config/settings-schema';
@@ -9,7 +9,7 @@ import { actionFor, HOTKEYS } from '../../src/ui/hotkeys';
 import { layerFor, mapInfo, siteWorldPositions, toRadar } from '../../src/model/maps';
 import type { Nade, RoundInfo } from '../../src/model/types';
 
-const cfg: ParseCfg = { tickrate: 64, sampleEveryTicks: 8, freezeWindowSeconds: 20, postRoundSeconds: 7, minBlindSeconds: 0.3, nadeMatchWindowSeconds: 20, smokeFallbackSeconds: 20, fireFallbackSeconds: 7 };
+const cfg: ParseCfg = { tickrate: 64, sampleEveryTicks: 8, freezeWindowSeconds: 20, postRoundSeconds: 7, minBlindSeconds: 0.3, nadeMatchWindowSeconds: 20, smokeFallbackSeconds: 20, fireFallbackSeconds: 7, minPlayers: 8, maxPlayers: 12 };
 const ev = (event_name: string, tick: number, extra: Row = {}): Row => ({ event_name, tick, ...extra });
 
 describe('findRounds', () => {
@@ -37,6 +37,16 @@ describe('findRounds', () => {
     expect(rounds).toHaveLength(1);
     expect(rounds[0].winnerSide).toBe('ct');
   });
+  it('numbers rounds by the game\'s rounds-played counter, not the event\'s round field', () => {
+    // Real case (Spirit–MOUZ Ancient): four round ends with no winner at halftime pushed `round` from 13 to 17.
+    const rounds = findRounds([
+      ev('round_freeze_end', 1000), ev('round_end', 2000, { winner: 'T', round: 12, total_rounds_played: 12 }),
+      ev('round_end', 3000, { round: 13, total_rounds_played: 12 }), ev('round_end', 3100, { round: 14, total_rounds_played: 12 }),
+      ev('round_end', 3200, { round: 15, total_rounds_played: 12 }), ev('round_end', 3300, { round: 16, total_rounds_played: 12 }),
+      ev('round_freeze_end', 4000), ev('round_end', 5000, { winner: 'CT', round: 17, total_rounds_played: 13 }),
+    ], cfg);
+    expect(rounds.map((r) => r.n)).toEqual([12, 13]);
+  });
   it('clips a long freeze window to 20 s', () => {
     const r = findRounds([ev('round_start', 0), ev('round_freeze_end', 5000), ev('round_end', 9000, { winner: 'T', round: 1 })], cfg)[0];
     expect(r.startTick).toBe(5000 - 20 * 64);
@@ -57,6 +67,16 @@ describe('sampling', () => {
   it('roundAt finds the round of a tick', () => {
     const rs = [{ startTick: 0, officialEndTick: 100 }, { startTick: 100, officialEndTick: 200 }];
     expect([roundAt(rs, 0), roundAt(rs, 99), roundAt(rs, 100), roundAt(rs, 200), roundAt(rs, -5)]).toEqual([0, 0, 1, -1, -1]);
+  });
+});
+
+describe('game type', () => {
+  it('5v5 (with a leaver or a substitute) is read; Wingman and Casual are refused with a plain message', () => {
+    for (const n of [8, 9, 10, 11, 12]) expect(() => checkPlayerCount(n, cfg)).not.toThrow();
+    expect(() => checkPlayerCount(4, cfg)).toThrow(/Wingman/);
+    expect(() => checkPlayerCount(7, cfg)).toThrow(/5v5/);
+    expect(() => checkPlayerCount(13, cfg)).toThrow(/Casual/);
+    expect(() => checkPlayerCount(20, cfg)).toThrow(/Casual/);
   });
 });
 

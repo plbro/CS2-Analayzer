@@ -1,6 +1,6 @@
 {
   "name": "open-skybox",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Free, open-source CS2 demo analyzer with a 2D replay. Demos never leave your browser.",
   "scripts": {
     "dev": "vite",

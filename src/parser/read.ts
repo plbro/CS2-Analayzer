@@ -44,7 +44,7 @@ export function readDemo(
   onStage('rounds');
   const events = (fns.parseEvents(bytes, EVENT_NAMES, EVENT_PLAYER_PROPS, EVENT_OTHER_PROPS) as unknown[]).map(toObj);
   const rounds = findRounds(events, cfg);
-  if (rounds.length === 0) throw new Error('No finished rounds found in this demo (is it only warmup?).');
+  if (rounds.length === 0) throw new Error('No finished rounds found in this demo. It may be only warmup, or a Deathmatch / Arms Race game, which Open Skybox does not read.');
   onStage('positions');
   const { ticks } = sampleTicks(rounds, cfg.sampleEveryTicks);
   const cols = toCols(fns.parseTicks(bytes, TICK_PROPS, ticks, null, true));

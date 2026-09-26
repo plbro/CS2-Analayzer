@@ -22,6 +22,8 @@ export interface ParseCfg {
   nadeMatchWindowSeconds: number;
   smokeFallbackSeconds: number;
   fireFallbackSeconds: number;
+  minPlayers: number;
+  maxPlayers: number;
 }
 
 /** Events we ask the reader for (one pass). */
@@ -33,7 +35,7 @@ export const EVENT_NAMES = [
 ];
 /** Extra fields added to every event about the player involved (gives user_X, attacker_X, ...). */
 export const EVENT_PLAYER_PROPS = ['X', 'Y', 'Z'];
-export const EVENT_OTHER_PROPS = ['is_warmup_period'];
+export const EVENT_OTHER_PROPS = ['is_warmup_period', 'total_rounds_played'];
 /** Per-player values read at every sample tick. */
 export const TICK_PROPS = [
   'X', 'Y', 'Z', 'yaw', 'health', 'armor_value', 'has_helmet', 'has_defuser', 'is_alive',
@@ -70,7 +72,10 @@ export function findRounds(events: Row[], cfg: ParseCfg): RawRound[] {
       case 'round_end': {
         const w = str(e.winner).toUpperCase();
         if ((w !== 'CT' && w !== 'T') || e.is_warmup_period === true || lastFreezeEnd === null || lastFreezeEnd >= tick) break;
-        const n = num(e.round, 0) >= 1 ? num(e.round) : count + 1;
+        // The game's own "rounds played" counter is the round number. The event's `round` field is not: it also counts
+        // round ends with no winner (e.g. a pause or restart at halftime), which made rounds jump from 12 to 17.
+        const played = num(e.total_rounds_played, 0);
+        const n = played >= 1 ? played : num(e.round, 0) >= 1 ? num(e.round) : count + 1;
         const windowStart = lastFreezeEnd - Math.round(cfg.freezeWindowSeconds * cfg.tickrate);
         const startTick = lastStart !== null && lastStart <= lastFreezeEnd ? Math.max(lastStart, windowStart) : windowStart;
         pending = { n, startTick: Math.max(0, startTick), freezeEndTick: lastFreezeEnd, endTick: tick, officialEndTick: -1, winnerSide: w === 'CT' ? 'ct' : 't', reason: str(e.reason) };
@@ -186,6 +191,19 @@ export interface BuildInput {
   sites?: { A: [number, number]; B: [number, number] } | null;
 }
 
+/**
+ * Stops early, with a plain message, on games that aren't 5v5 (Wingman, Casual, ...), instead of showing a broken screen.
+ * The limits come from settings (parse.minPlayers / parse.maxPlayers) so a substitute or an early leaver still fits.
+ */
+export function checkPlayerCount(count: number, cfg: Pick<ParseCfg, 'minPlayers' | 'maxPlayers'>): void {
+  if (count < cfg.minPlayers) {
+    throw new Error(`This demo has ${count} players. It looks like Wingman or another small game; Open Skybox reads 5v5 matches (Premier, Competitive, FACEIT) only for now.`);
+  }
+  if (count > cfg.maxPlayers) {
+    throw new Error(`This demo has ${count} players. It looks like Casual or another large game; Open Skybox reads 5v5 matches (Premier, Competitive, FACEIT) only for now.`);
+  }
+}
+
 /** Builds the full Match. */
 export function buildMatch({ header, events, ticks, cfg, sites }: BuildInput): Match {
   const notes: string[] = [];
@@ -215,6 +233,7 @@ export function buildMatch({ header, events, ticks, cfg, sites }: BuildInput): M
   }
   const maxCount = Math.max(1, ...[...seen.values()].map((s) => s.count));
   const ids = [...seen.entries()].filter(([, s]) => s.count >= maxCount * 0.05).map(([id]) => id);
+  checkPlayerCount(ids.length, cfg);
   if (ids.length !== 10) notes.push(`Found ${ids.length} players instead of 10.`);
 
   // side each player is on at a given sample

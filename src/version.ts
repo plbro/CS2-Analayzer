@@ -1,5 +1,5 @@
 /** App version. Must match package.json and any version-tracked notes (tools/check.mjs enforces it). */
-export const VERSION = '0.1.2';
+export const VERSION = '0.2.0';
 
 /**
  * Version of the parsed-match data shape passed from the demo reader (worker) to the screen.

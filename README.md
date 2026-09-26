@@ -5,7 +5,7 @@ positions, aim direction, HP, armor, money, weapons, utility, kills, bomb, and m
 
 **Your demo never leaves your computer.** It's read inside your browser by a WebAssembly demo reader, so there's no upload and no server.
 
-> Status: early (v0.1.0). The replay works; ratings, smoke library, player tendencies and pro-match library are planned.
+> Status: early (v0.2.0). The replay works; ratings, smoke library, player tendencies and pro-match library are planned.
 
 ## Use it
 
@@ -15,6 +15,8 @@ positions, aim direction, HP, armor, money, weapons, utility, kills, bomb, and m
      `Steam\steamapps\common\Counter-Strike Global Offensive\game\csgo\replays`.
    - Pro matches: download from HLTV and **unzip** first.
 3. A 300–400 MB demo takes about 15–40 seconds to read.
+
+Reads normal 5v5 matches (Premier, Competitive, FACEIT, pro matches). Wingman, Casual and Deathmatch demos are refused with a message.
 
 Works best in a desktop Chrome, Edge or Firefox. Phones may run out of memory on big demos.
 
@@ -62,9 +64,12 @@ Positions are kept 8 times per second (`parse.sampleEveryTicks`) and smoothed in
 npm install
 npm run dev         # local site at http://localhost:5173
 npm run verify      # type-check + cross-checks + unit tests
-npm run test:demo   # slow: reads the real demos in test-demos/ (not in git)
+npm run test:demo   # slow: reads every demo in test-demos/ (not in git) and prints a summary table
 npm run build       # production build in dist/
 ```
+
+`npm run test:demo` checks each demo's final score against an outside source: an entry in `tests/demo/expected.json`, or the
+score in square brackets in the file name, e.g. `faceit mirage [13-9].dem`. Demos without one are marked "score NOT checked".
 
 - `src/parser/` reads the demo (worker + pure builder), `src/model/` answers "what's happening at tick X",
   `src/playback/store.ts` owns state and the single animation loop, `src/render/` draws the map, `src/ui/` is the React screen.

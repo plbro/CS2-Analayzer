@@ -41,6 +41,16 @@ export const SETTINGS = {
     smokeFallbackSeconds: 20,
     /** If the demo doesn't say when a molotov went out, assume it burned this many seconds. Range 2–15. */
     fireFallbackSeconds: 7,
+    /**
+     * Fewer players than this = not a 5v5 match (e.g. Wingman), and the demo is refused with a plain message.
+     * 8 still lets in a match where a couple of players left early. Range 2–10.
+     */
+    minPlayers: 8,
+    /**
+     * More players than this = not a 5v5 match (e.g. Casual 10v10), and the demo is refused with a plain message.
+     * 12 still lets in a match with a substitute. Range 10–24.
+     */
+    maxPlayers: 12,
   },
 
   /** Round rules used for the clock. Only change for custom game modes. */
